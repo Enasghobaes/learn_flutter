@@ -63,10 +63,10 @@ Future<List<QuizModel>> getquestionData() async {
     Response response =
         await req.get("https://66359296415f4e1a5e24d970.mockapi.io/quize_api");
     for (var i = 0; i < response.data!.length; i++) {
-      QuizModel question_st = QuizModel.fromMap(response.data![i]);
+      QuizModel questionSt = QuizModel.fromMap(response.data![i]);
 
-      questio.add(question_st);
-      print(question_st);
+      questio.add(questionSt);
+      print(questionSt);
     }
     return questio;
   } catch (e) {

@@ -1,6 +1,4 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:quize2_api/core/config/get_it.dart';
 import 'package:quize2_api/model/model_quize.dart';
 import 'package:quize2_api/service/quize_service.dart';
@@ -10,6 +8,13 @@ void main() {
   setup();
   runApp(const MyApp());
 }
+
+PageController pageController = PageController();
+double countcorrectprogresslinear = 0.0;
+double countwrongprogresslinear = 0.0;
+int counterCorrectAnswer = 0;
+int counterwrongAnswer = 0;
+int count = 0;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -27,6 +32,7 @@ class MyHomePage extends StatelessWidget {
   MyHomePage({
     super.key,
   });
+
   TextEditingController name = TextEditingController();
 
   @override
@@ -36,26 +42,26 @@ class MyHomePage extends StatelessWidget {
         backgroundColor: Colors.pink,
         title: const Center(child: Text("hello")),
       ),
-      body: const Center(
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Padding(
+            const Padding(
               padding: EdgeInsets.all(8.0),
               child: Text(
                 'Enter your name:',
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8.0),
               child: SizedBox(
                 width: 300,
                 child: TextField(
                   // controller: name,
-                  // onChanged: (value) {
-                  //   core.get<SharedPreferences>().setString('name', value);
-                  // },
-                  decoration: InputDecoration(
+                  onChanged: (value) {
+                    core.get<SharedPreferences>().setString('name', value);
+                  },
+                  decoration: const InputDecoration(
                     hintText: "name",
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(20))),
@@ -68,11 +74,19 @@ class MyHomePage extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => CreateQuiz(),
-              ));
+          if (core.get<SharedPreferences>().getString('name') == null) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("Enter your name"),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ));
+          } else {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CreateQuiz(),
+                ));
+          }
         },
         child: const Icon(Icons.send),
       ),
@@ -80,10 +94,11 @@ class MyHomePage extends StatelessWidget {
   }
 }
 
+int counter = 0;
+
 // ignore: must_be_immutable
 class CreateQuiz extends StatelessWidget {
   CreateQuiz({super.key});
-  // Int counter = questio.length as Int;
 
   TextEditingController question = TextEditingController();
   TextEditingController answer = TextEditingController();
@@ -91,121 +106,100 @@ class CreateQuiz extends StatelessWidget {
   TextEditingController answer2 = TextEditingController();
   TextEditingController answer3 = TextEditingController();
   TextEditingController indexOfCorrect = TextEditingController();
-  // List<TextEditingController> answers = [
-  //   TextEditingController(),
-  //   TextEditingController(),
-  //   TextEditingController(),
-  //   TextEditingController()
-  // ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SizedBox(
-                width: 400,
-                child: TextField(
-                  controller: question,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              width: 400,
+              child: TextField(
+                controller: question,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
                   ),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SizedBox(
-                width: 400,
-                child: TextField(
-                  // controller: answers[0],
-                  controller: answer,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              width: 400,
+              child: TextField(
+                controller: answer,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
                   ),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SizedBox(
-                width: 400,
-                child: TextField(
-                  // controller: answers[1],
-                  controller: answer1,
-
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              width: 400,
+              child: TextField(
+                controller: answer1,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
                   ),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SizedBox(
-                width: 400,
-                child: TextField(
-                  // controller: answers[2],
-                  controller: answer2,
-
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              width: 400,
+              child: TextField(
+                controller: answer2,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
                   ),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SizedBox(
-                width: 400,
-                child: TextField(
-                  // controller: answers[3],
-                  controller: answer3,
-
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              width: 400,
+              child: TextField(
+                controller: answer3,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
                   ),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SizedBox(
-                width: 400,
-                child: TextField(
-                  controller: indexOfCorrect,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              width: 400,
+              child: TextField(
+                controller: indexOfCorrect,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       floatingActionButton: InkWell(
           onTap: () async {
-            // if (counter == 3) {
-            //   Navigator.push(
-            //       context,
-            //       MaterialPageRoute(
-            //         builder: (context) => const get_question(),
-            //       ));
-            // } else {
             bool status = await QuizServiceImp().createNewQuiz(QuizModel(
                 question: question.text,
                 answers: [
@@ -217,105 +211,218 @@ class CreateQuiz extends StatelessWidget {
                 indexOfCorrect: num.parse(indexOfCorrect.text)));
 
             if (status) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              // ignore: use_build_context_synchronously
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                 content: Text("Success"),
                 backgroundColor: Colors.green,
                 behavior: SnackBarBehavior.floating,
               ));
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              // ignore: use_build_context_synchronously
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                 content: Text("Error"),
                 backgroundColor: Colors.red,
                 behavior: SnackBarBehavior.floating,
               ));
             }
-            // }
-            // ;
+            counter++;
+            if (counter == 1) {
+              Navigator.push(
+                  // ignore: use_build_context_synchronously
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const questionpage(),
+                  ));
+            }
           },
-          child: Icon(Icons.send)),
+          child: const Icon(Icons.send)),
     );
   }
 }
 
-double countquestion = 0.0;
-int countcorrect = 0;
-int countwrong = 0;
-double counterCorrectAnswer = 0.0;
-double counterwrongAnswer = 0.0;
-PageController pageController = PageController();
+// ignore: camel_case_types
+// class questionpage extends StatelessWidget {
+//   const questionpage({super.key});
 
-class get_question extends StatefulWidget {
-  const get_question({super.key});
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//         body: PageView.builder(
+//       physics: const NeverScrollableScrollPhysics(),
+//       controller: pageController,
+//       itemCount: questio.length,
+//       itemBuilder: (context, ind) {
+//         return Scaffold(
+//           body: Column(
+//             children: [
+//               Container(
+//                 // width: 400,
+//                 height: 200,
+//                 color: const Color.fromARGB(200, 199, 117, 145),
+//                 child: Column(children: [
+//                   Center(child: Text(questio[ind].question)),
+//                   SizedBox(
+//                     height: 400,
+//                     // width: 200,
+//                     child: ListView.builder(
+//                       itemCount: questio[ind].answers.length,
+//                       itemBuilder: (context, index) {
+//                         return ListTile(
+//                           onTap: () {
+//                             if (index == questio[ind].indexOfCorrect) {
+//                               countcorrectprogresslinear + 0.1;
+//                               counterCorrectAnswer++;
+//                               ScaffoldMessenger.of(context).showSnackBar(
+//                                 const SnackBar(
+//                                     dismissDirection:
+//                                         DismissDirection.horizontal,
+//                                     showCloseIcon: true,
+//                                     behavior: SnackBarBehavior.floating,
+//                                     backgroundColor: Colors.green,
+//                                     content: Text("CorrectAnswer")),
+//                               );
+//                             } else {
+//                               countwrongprogresslinear + 0.1;
+//                               counterwrongAnswer++;
+//                               ScaffoldMessenger.of(context).showSnackBar(
+//                                 const SnackBar(
+//                                   dismissDirection: DismissDirection.horizontal,
+//                                   showCloseIcon: true,
+//                                   behavior: SnackBarBehavior.floating,
+//                                   backgroundColor: Colors.red,
+//                                   content: Text("wrongAnswer"),
+//                                 ),
+//                               );
+//                             }
+
+//                             pageController.nextPage(
+//                                 duration: const Duration(seconds: 1),
+//                                 curve: Curves.bounceInOut);
+//                             count++;
+
+//                             if (count == 3) {
+//                               Navigator.push(
+//                                   context,
+//                                   MaterialPageRoute(
+//                                     builder: (context) => const score_page(),
+//                                   ));
+//                             }
+//                           },
+//                           subtitle: Text(questio[ind].answers[index]),
+//                         );
+//                       },
+//                     ),
+//                   ),
+//                 ]),
+//               ),
+//             ],
+//           ),
+//         );
+//       },
+//     ));
+//   }
+// }
+
+class questionpage extends StatefulWidget {
+  const questionpage({super.key});
 
   @override
-  State<get_question> createState() => _get_questionState();
+  State<questionpage> createState() => _questionpageState();
 }
 
-class _get_questionState extends State<get_question> {
-  @override
-  void setState(VoidCallback fn) {
-    countquestion++;
-  }
-
+class _questionpageState extends State<questionpage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView.builder(
-        physics: NeverScrollableScrollPhysics(),
-        controller: pageController,
-        itemCount: questio.length,
-        itemBuilder: (context, ind) {
-          return Scaffold(
-            body: Column(
-              children: [
-                Container(
-                    // width: 400,
-                    height: 200,
-                    color: Color.fromARGB(200, 199, 117, 145),
-                    child: Column(children: [
-                      Center(child: Text(questio[ind].question)),
-                    ])),
-                Container(
-                  height: 400,
-                  // width: 200,
-                  child: ListView.builder(
-                    itemCount: questio[ind].answers.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        onTap: () {
-                          if (index == questio[ind].indexOfCorrect) {
-                            counterCorrectAnswer + 0.1;
-                            countcorrect++;
-                          } else {
-                            counterwrongAnswer + 0.1;
-                            countwrong++;
-                          }
-                          pageController.nextPage(
-                              duration: Duration(seconds: 1),
-                              curve: Curves.bounceInOut);
+      appBar: AppBar(
+        title: const Text("solve for all question:"),
+      ),
+      body: Container(
+        // color: Colors.brown,
+        child: FutureBuilder(
+          future: getquestionData(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return Center(
+                child: Container(
+                  width: 700,
+                  height: 700,
+                  // color: const Color.fromARGB(200, 199, 117, 145),
+                  child: Column(children: [
+                    SizedBox(
+                      height: 400,
+                      // width: 200,
+                      child: ListView.builder(
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            title: Text(
+                              snapshot.data![index].question,
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            onTap: () {
+                              if (index == questio[index].indexOfCorrect) {
+                                countcorrectprogresslinear + 0.1;
+                                counterCorrectAnswer++;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      dismissDirection:
+                                          DismissDirection.horizontal,
+                                      showCloseIcon: true,
+                                      behavior: SnackBarBehavior.floating,
+                                      backgroundColor: Colors.green,
+                                      content: Text("CorrectAnswer")),
+                                );
+                              } else {
+                                countwrongprogresslinear + 0.1;
+                                counterwrongAnswer++;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    dismissDirection:
+                                        DismissDirection.horizontal,
+                                    showCloseIcon: true,
+                                    behavior: SnackBarBehavior.floating,
+                                    backgroundColor: Colors.red,
+                                    content: Text("wrongAnswer"),
+                                  ),
+                                );
+                              }
+
+                              pageController.nextPage(
+                                  duration: const Duration(seconds: 1),
+                                  curve: Curves.bounceInOut);
+                              count++;
+
+                              if (count == 3) {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const score_page(),
+                                    ));
+                              }
+                            },
+                            subtitle: Text(questio[index].answers[index]),
+                          );
                         },
-                        subtitle: Text(questio[ind].answers[index]),
-                      );
-                    },
-                  ),
+                      ),
+                    ),
+                  ]),
                 ),
-              ],
-            ),
-          );
-        },
+              );
+            } else {
+              return const CircularProgressIndicator();
+            }
+          },
+        ),
       ),
     );
   }
 }
 
-class score_page extends StatefulWidget {
+// ignore: camel_case_types
+class score_page extends StatelessWidget {
   const score_page({super.key});
 
-  @override
-  State<score_page> createState() => _score_pageState();
-}
-
-class _score_pageState extends State<score_page> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -328,58 +435,38 @@ class _score_pageState extends State<score_page> {
             height: 300,
             decoration:
                 const BoxDecoration(color: Color.fromARGB(255, 225, 143, 170)),
-            child: const Column(
+            child: Column(
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("enas"
-                        // core.get<SharedPreferences>().getString('name') ??
-                        //     "No name",
-                        ),
+                    Text(
+                      core.get<SharedPreferences>().getString('name') ??
+                          "No name",
+                    )
                   ],
                 ),
                 Padding(
-                  padding: EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       LinearProgressIndicator(
-                        backgroundColor: Color.fromARGB(255, 9, 230, 61),
+                        backgroundColor: const Color.fromARGB(255, 9, 230, 61),
                         minHeight: 10,
-                        // value: counterCorrectAnswer
+                        value: countcorrectprogresslinear,
                       ),
                       LinearProgressIndicator(
-                        backgroundColor: Color.fromARGB(255, 230, 9, 27),
+                        backgroundColor: const Color.fromARGB(255, 230, 9, 27),
                         minHeight: 10,
-                        // value: counterwrongAnswer,
+                        value: countwrongprogresslinear,
                       )
                     ],
                   ),
-                )
+                ),
               ],
             ),
           ),
         ));
-  }
-}
-
-List<QuizModel> questio = [];
-Future<List<QuizModel>> getquestionData() async {
-  Dio req = Dio();
-
-  try {
-    Response response =
-        await req.get("https://66359296415f4e1a5e24d970.mockapi.io/quize_api");
-    for (var i = 0; i < response.data!.length; i++) {
-      QuizModel question_st = QuizModel.fromMap(response.data![i]);
-
-      questio.add(question_st);
-      print(question_st);
-    }
-    return questio;
-  } catch (e) {
-    print(e);
-    return questio;
   }
 }
